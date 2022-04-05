@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            html {
+                user-select: none;
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+            }
+            body {
+                height: 100vh;
+            }
+            .scoreboard {
+                display: inline-block;
+                padding: .675em .75em;
+                background-color: #f0f0f0;
+                z-index: 0;
+            }
+            .target {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translateY(-50%) translateX(-50%);
+                padding: .675em 1em;
+                background-color: grey;
+                z-index: 1;
+            }
+        </style>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+            var score = 0;
+            var accuracy = 0;
+            var hitCount = 0;
+            var missCount = 0;
+            let clickCount = 0;
+            let prevResponseTime = 0;
+            let totalResponseTime = 0;
+
+            // Calculate accuracy
+            function calcAcc(hitCount, missCount) {
+                $('.accuracy').html(Math.floor(hitCount / (hitCount + missCount) * 100)+'%');
+            }
+
+            // Calculate average response time
+            function avgResponse(clickCount, responseTime) {
+                totalResponseTime += responseTime;
+                $('.response-time').html(Math.floor(totalResponseTime / clickCount) + 'ms');
+            }
+
+            $(document).ready(function() {
+                // On hit
+                $(document).on('click', '.target', function() {
+                    // Update score
+                    hitCount++;
+                    score++;
+                    $('.score').html(score);
+
+                    // Set new position
+                    $(this).css({
+                        'top': (Math.random() * 100)+'%', 
+                        'left': (Math.random() * 100)+'%'
+                    });
+                });
+                $(document).click(function(e) {
+
+                    // On miss
+                    if(!$(e.target).closest('.target').length) {
+                        // Reduce score
+                        missCount++;
+                        score--;
+                        $('.score').html(score);
+                    }
+
+                    // On click functions
+                    // -- Accuracy calculation
+                    calcAcc(hitCount, missCount);
+                    // -- Average response time calculation
+                    if(prevResponseTime > 0) {
+                        clickCount = hitCount + missCount;
+                        let responseTime = (new Date()).getTime() - prevResponseTime;
+                        avgResponse(clickCount, responseTime);
+                        prevResponseTime += responseTime;
+                    } else {
+                        prevResponseTime = (new Date()).getTime();
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div class="scoreboard">
+            <span>Score:&nbsp;</span>
+            <span class="score">0</span>
+            <br/>
+            <span>Accuracy:&nbsp;</span>
+            <span class="accuracy">0</span>
+            <br/>
+            <span>Average response time:&nbsp;</span>
+            <span class="response-time">0ms</span>
+        </div>
+        <div class="target">+</div>
+    </body>
+</html>
